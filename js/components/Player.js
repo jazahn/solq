@@ -54,8 +54,6 @@ define([], function(){
 
     };
     Player.prototype.timeUpdate = function(){
-        console.log(this.config.music.currentTime);
-        console.log(this.duration);
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
@@ -72,25 +70,26 @@ define([], function(){
     Player.prototype.mouseDown = function() {
         var that = this;
         this.onplayhead = true;
-        window.addEventListener('mousemove', function(e){ console.log(e); that.moveplayhead(e); }, true);
-        this.config.music.removeEventListener('timeupdate', function(){ that.timeUpdate(); }, false);
+        this.currentMousemoveListener = function(e){ that.moveplayhead(e); };
+        window.addEventListener('mousemove', this.currentMousemoveListener, true);
+        this.config.music.removeEventListener('timeupdate', this.timeUpdateListener, false);
     };
     // mouseUp EventListener
     // getting input from all mouse clicks
     Player.prototype.mouseUp = function(e) {
         var that = this;
         if (this.onplayhead == true) {
-            window.removeEventListener('mousemove', function(e){ that.moveplayhead(e); }, true);
+            window.removeEventListener('mousemove', this.currentMousemoveListener, true);
             // change current time
             this.config.music.currentTime = this.duration * this.clickPercent(e);
-            this.config.music.addEventListener('timeupdate', function(){ that.timeUpdate(); }, false);
+            this.timeUpdateListener = function(){ that.timeUpdate(); };
+            this.config.music.addEventListener('timeupdate', this.timeUpdateListener, false);
         }
         this.onplayhead = false;
     };
     // mousemove EventListener
     // Moves playhead as user drags
     Player.prototype.moveplayhead = function(e) {
-        console.log(e);
         var newMargLeft = e.pageX - this.config.timeline.offsetLeft;
         if (newMargLeft >= 0 && newMargLeft <= this.timelineWidth) {
             this.config.playhead.style.marginLeft = newMargLeft + "px";
