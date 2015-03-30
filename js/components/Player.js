@@ -32,13 +32,12 @@ define([], function(){
 
         // Gets audio file duration
         this.config.music.addEventListener("canplaythrough", function () {
-            duration = that.config.music.duration;
+            that.duration = that.config.music.duration;
         }, false);
 
         // forcing load so we can get the duration
         this.config.music.load();
         this.config.playButton.addEventListener('click', function(e){
-            console.log(e);
             // start music
             if (that.config.music.paused) {
                 that.config.music.play();
@@ -55,6 +54,8 @@ define([], function(){
 
     };
     Player.prototype.timeUpdate = function(){
+        console.log(this.config.music.currentTime);
+        console.log(this.duration);
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {

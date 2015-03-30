@@ -9,7 +9,7 @@ require(["jquery", "Player"], function($, Player) {
         };
 
         var initialPlayer = new Player(initial_player_config);
-        
+
 
     });
 
