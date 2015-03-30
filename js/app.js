@@ -6,7 +6,7 @@ requirejs.config({
     "baseUrl": "js/lib",
     "paths": {
         "app": "../app",
-        "Player": "../components/Player"
+        "Player": "../app/components/Player"
     },
     "shim": {
 

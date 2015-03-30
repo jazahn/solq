@@ -1,4 +1,4 @@
-define(["jquery"], function($){
+define(["../lib/jquery"], function($){
     var Player = function(config){
         config = config || {};
         var defaultConfig = {
@@ -52,8 +52,6 @@ define(["jquery"], function($){
         if (this.config.music.currentTime == this.duration) {
             that.$playButtonImage.removeClass("glyphicon-pause");
             that.$playButtonImage.addClass("glyphicon-play");
-//            this.config.playButton.className = "";
-//            this.config.playButton.className = "glyphicon glyphicon-play";
         }
     };
     // returns click as decimal (.77) of the total timelineWidth
@@ -104,15 +102,11 @@ define(["jquery"], function($){
             // remove play, add pause
             this.$playButtonImage.removeClass("glyphicon-play");
             this.$playButtonImage.addClass("glyphicon-pause");
-//            this.config.playButton.className = "";
-//            this.config.playButton.className = "glyphicon glyphicon-pause";
         } else { // pause music
             this.config.music.pause();
             // remove pause, add play
             this.$playButtonImage.removeClass("glyphicon-pause");
             this.$playButtonImage.addClass("glyphicon-play");
-//            this.config.playButton.className = "";
-//            this.config.playButton.className = "glyphicon glyphicon-play";
         }
     };
 
