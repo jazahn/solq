@@ -23,12 +23,12 @@ define([], function(){
         this.config.music.addEventListener("timeupdate", function(){ that.timeUpdate(); }, false);
         this.config.timeline.addEventListener("click", function (event) {
             that.moveplayhead(event);
-            that.config.music.currentTime = duration * that.clickPercent(event);
+            that.config.music.currentTime = that.duration * that.clickPercent(event);
         }, false);
 
         // Makes playhead draggable
-        this.config.playhead.addEventListener('mousedown', function(){ that.mouseDown(); }, false);
-        window.addEventListener('mouseup', function(){ that.mouseUp(); }, false);
+        this.config.playhead.addEventListener('mousedown', function(e){ that.mouseDown(e); }, false);
+        window.addEventListener('mouseup', function(e){ that.mouseUp(e); }, false);
 
         // Gets audio file duration
         this.config.music.addEventListener("canplaythrough", function () {
@@ -70,25 +70,27 @@ define([], function(){
     };
     // mouseDown EventListener
     Player.prototype.mouseDown = function() {
+        var that = this;
         this.onplayhead = true;
-        window.addEventListener('mousemove', this.moveplayhead, true);
-        this.config.music.removeEventListener('timeupdate', function(){ this.timeUpdate(); }, false);
+        window.addEventListener('mousemove', function(e){ console.log(e); that.moveplayhead(e); }, true);
+        this.config.music.removeEventListener('timeupdate', function(){ that.timeUpdate(); }, false);
     };
     // mouseUp EventListener
     // getting input from all mouse clicks
     Player.prototype.mouseUp = function(e) {
+        var that = this;
         if (this.onplayhead == true) {
-            this.moveplayhead(e);
-            window.removeEventListener('mousemove', this.moveplayhead, true);
+            window.removeEventListener('mousemove', function(e){ that.moveplayhead(e); }, true);
             // change current time
             this.config.music.currentTime = this.duration * this.clickPercent(e);
-            this.config.music.addEventListener('timeupdate', function(){ this.timeUpdate(); }, false);
+            this.config.music.addEventListener('timeupdate', function(){ that.timeUpdate(); }, false);
         }
         this.onplayhead = false;
     };
     // mousemove EventListener
     // Moves playhead as user drags
     Player.prototype.moveplayhead = function(e) {
+        console.log(e);
         var newMargLeft = e.pageX - this.config.timeline.offsetLeft;
         if (newMargLeft >= 0 && newMargLeft <= this.timelineWidth) {
             this.config.playhead.style.marginLeft = newMargLeft + "px";
