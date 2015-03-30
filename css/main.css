@@ -21,11 +21,11 @@
 
 #timeline{
     width: 400px;
-    height: 10px;
+    height: 3px;
     margin-top: 20px;
     float: left;
     border-radius: 15px;
-    background: rgba(0,0,0,.3);
+    background: rgba(255,0,0,.8);
 
 }
 #playhead{
