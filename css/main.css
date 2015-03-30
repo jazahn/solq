@@ -8,16 +8,14 @@
 #pButton{
     height:60px;
     width: 60px;
-    border: none;
     background-size: 50% 50%;
     background-repeat: no-repeat;
     background-position: center;
     float:left;
     outline:none;
+    background: transparent;
+    border: none !important;
 }
-
-.play{background: url('http://www.alexkatz.me/codepen/images/play.png') ;}
-.pause{background: url('http://www.alexkatz.me/codepen/images/pause.png') ;}
 
 #timeline{
     width: 400px;

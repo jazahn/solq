@@ -17,6 +17,7 @@ define(["jquery"], function($){
         this.mouseDown = $.proxy(this.mouseDown, this);
         this.mouseUp = $.proxy(this.mouseUp, this);
         this.moveplayhead = $.proxy(this.moveplayhead, this);
+        this.play = $.proxy(this.play, this);
         this.init();
 
     };
@@ -41,28 +42,18 @@ define(["jquery"], function($){
 
         // forcing load so we can get the duration earlier
         this.config.music.load();
-        this.config.playButton.addEventListener('click', function(e){
-            // start music
-            if (that.config.music.paused) {
-                that.config.music.play();
-                // remove play, add pause
-                that.config.playButton.className = "";
-                that.config.playButton.className = "pause";
-            } else { // pause music
-                that.config.music.pause();
-                // remove pause, add play
-                that.config.playButton.className = "";
-                that.config.playButton.className = "play";
-            }
-        }, false);
+        this.config.playButton.addEventListener('click', this.play, false);
 
     };
     Player.prototype.timeUpdate = function(){
+        console.log("timeUpdate");
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
-            this.config.playButton.className = "";
-            this.config.playButton.className = "play";
+            that.$playButtonImage.removeClass("glyphicon-pause");
+            that.$playButtonImage.addClass("glyphicon-play");
+//            this.config.playButton.className = "";
+//            this.config.playButton.className = "glyphicon glyphicon-play";
         }
     };
     // returns click as decimal (.77) of the total timelineWidth
@@ -104,18 +95,24 @@ define(["jquery"], function($){
         }
     };
     //Play and Pause
-    Player.prototype.play = function(e) {
+    Player.prototype.play = function() {
+        console.log("play");
+        this.$playButtonImage = $(this.config.playButton).find(".glyphicon");
         // start music
         if (this.config.music.paused) {
             this.config.music.play();
             // remove play, add pause
-            this.config.playButton.className = "";
-            this.config.playButton.className = "pause";
+            this.$playButtonImage.removeClass("glyphicon-play");
+            this.$playButtonImage.addClass("glyphicon-pause");
+//            this.config.playButton.className = "";
+//            this.config.playButton.className = "glyphicon glyphicon-pause";
         } else { // pause music
             this.config.music.pause();
             // remove pause, add play
-            this.config.playButton.className = "";
-            this.config.playButton.className = "play";
+            this.$playButtonImage.removeClass("glyphicon-pause");
+            this.$playButtonImage.addClass("glyphicon-play");
+//            this.config.playButton.className = "";
+//            this.config.playButton.className = "glyphicon glyphicon-play";
         }
     };
 
