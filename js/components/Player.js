@@ -1,18 +1,22 @@
-define([], function(){
+define(["jquery"], function($){
     var Player = function(config){
-        this.config = config || {};
-        this.config = {
-            music: config.music || '',
-            playButton: config.playButton || '',
-            playhead: config.playHead || '',
-            timeline: config.timeline || '',
+        config = config || {};
+        var defaultConfig = {
+            music: '',
+            playButton: '',
+            playhead: '',
+            timeline: ''
         };
+        this.config = $.extend(defaultConfig, config);
         this.timelineWidth = 0;
         this.duration = 10;
 
         // Boolean value so that mouse is moved on mouseUp only when the playhead is released
-        var onplayhead = false;
-
+        this.onplayhead = false;
+        this.timeUpdate = $.proxy(this.timeUpdate, this);
+        this.mouseDown = $.proxy(this.mouseDown, this);
+        this.mouseUp = $.proxy(this.mouseUp, this);
+        this.moveplayhead = $.proxy(this.moveplayhead, this);
         this.init();
 
     };
@@ -20,22 +24,22 @@ define([], function(){
         var that = this;
 
         this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
-        this.config.music.addEventListener("timeupdate", function(){ that.timeUpdate(); }, false);
+        this.config.music.addEventListener("timeupdate", this.timeUpdate, false);
         this.config.timeline.addEventListener("click", function (event) {
             that.moveplayhead(event);
             that.config.music.currentTime = that.duration * that.clickPercent(event);
         }, false);
 
         // Makes playhead draggable
-        this.config.playhead.addEventListener('mousedown', function(e){ that.mouseDown(e); }, false);
-        window.addEventListener('mouseup', function(e){ that.mouseUp(e); }, false);
+        this.config.playhead.addEventListener('mousedown', this.mouseDown, false);
+        window.addEventListener('mouseup', this.mouseUp, false);
 
         // Gets audio file duration
         this.config.music.addEventListener("canplaythrough", function () {
             that.duration = that.config.music.duration;
         }, false);
 
-        // forcing load so we can get the duration
+        // forcing load so we can get the duration earlier
         this.config.music.load();
         this.config.playButton.addEventListener('click', function(e){
             // start music
@@ -70,20 +74,18 @@ define([], function(){
     Player.prototype.mouseDown = function() {
         var that = this;
         this.onplayhead = true;
-        this.currentMousemoveListener = function(e){ that.moveplayhead(e); };
-        window.addEventListener('mousemove', this.currentMousemoveListener, true);
-        this.config.music.removeEventListener('timeupdate', this.timeUpdateListener, false);
+        window.addEventListener('mousemove', this.moveplayhead, true);
+        this.config.music.removeEventListener('timeupdate', this.timeUpdate, false);
     };
     // mouseUp EventListener
     // getting input from all mouse clicks
     Player.prototype.mouseUp = function(e) {
         var that = this;
         if (this.onplayhead == true) {
-            window.removeEventListener('mousemove', this.currentMousemoveListener, true);
+            window.removeEventListener('mousemove', this.moveplayhead, true);
             // change current time
             this.config.music.currentTime = this.duration * this.clickPercent(e);
-            this.timeUpdateListener = function(){ that.timeUpdate(); };
-            this.config.music.addEventListener('timeupdate', this.timeUpdateListener, false);
+            this.config.music.addEventListener('timeupdate', this.timeUpdate, false);
         }
         this.onplayhead = false;
     };
@@ -115,12 +117,6 @@ define([], function(){
             this.config.playButton.className = "";
             this.config.playButton.className = "play";
         }
-    };
-
-
-
-    Player.prototype.createPlayer = function(location){
-
     };
 
     return Player;
