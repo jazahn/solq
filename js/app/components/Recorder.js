@@ -1,3 +1,7 @@
+/**
+ * code adapted from https://github.com/mattdiamond/Recorderjs
+ * MIT License
+ */
 define([], function(){
     /**
      *
@@ -82,7 +86,7 @@ define([], function(){
     };
     Recorder.prototype.doneEncoding = function(blob){
         Recorder.forceDownload( blob, "myRecording.wav" );
-    }
+    };
 
     Recorder.forceDownload = function(blob, filename){
         var url = (window.URL || window.webkitURL).createObjectURL(blob);

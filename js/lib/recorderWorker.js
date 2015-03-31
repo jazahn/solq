@@ -1,4 +1,7 @@
-
+/**
+ * code adapted from https://github.com/mattdiamond/Recorderjs
+ * MIT License
+ */
 
 var recLength = 0,
     recBuffers = [],

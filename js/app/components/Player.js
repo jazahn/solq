@@ -153,6 +153,8 @@ define(["jquery", "Recorder"], function($, Recorder){
     };
     /**
      * Starts recording from this Player
+     * click handler, toggles recording
+     * @param {event} e
      */
     Player.prototype.record = function(e){
         var that = this;
@@ -167,7 +169,7 @@ define(["jquery", "Recorder"], function($, Recorder){
             this.recording = true;
             // TODO: stop the player
 
-            // TODO: start recording
+            // TODO: clean this up / move it to the Recorder class
             if (!navigator.getUserMedia)
                 navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
             if (!navigator.cancelAnimationFrame)
