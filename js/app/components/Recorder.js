@@ -98,6 +98,59 @@ define([], function(){
         link.dispatchEvent(click);
     };
 
+    /**
+     * convenience function for setting up the getUserMedia
+     * mostly adapted from: https://github.com/cwilso/AudioRecorder
+     * @return {Recorder}
+     */
+    Recorder.start = function(callback){
+        var recorder;
+
+        if (!navigator.getUserMedia)
+            navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+        if (!navigator.cancelAnimationFrame)
+            navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+        if (!navigator.requestAnimationFrame)
+            navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
+
+        navigator.getUserMedia(
+            {
+                "audio": {
+                    "mandatory": {
+                        "googEchoCancellation": "false",
+                        "googAutoGainControl": "false",
+                        "googNoiseSuppression": "false",
+                        "googHighpassFilter": "false"
+                    },
+                    "optional": []
+                },
+            }, function(stream){
+
+                window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                var audioContext = new AudioContext();
+                var inputPoint = audioContext.createGain();
+
+                // Create an AudioNode from the stream.
+                realAudioInput = audioContext.createMediaStreamSource(stream);
+                audioInput = realAudioInput;
+                audioInput.connect(inputPoint);
+
+                // audioInput = convertToMono( input );
+
+                analyserNode = audioContext.createAnalyser();
+                analyserNode.fftSize = 2048;
+                inputPoint.connect( analyserNode );
+
+                recorder = new Recorder( inputPoint );
+                callback(recorder);
+
+            }, function(e) {
+                alert('Error getting audio');
+                console.log(e);
+            });
+
+    };
+
 
     return Recorder;
 

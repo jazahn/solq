@@ -27,6 +27,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.moveplayhead = $.proxy(this.moveplayhead, this);
         this.play = $.proxy(this.play, this);
         this.record = $.proxy(this.record, this);
+        this.onrecorderstart = $.proxy(this.onrecorderstart, this);
         this.init();
 
     };
@@ -70,7 +71,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
             this.$playButtonImage.removeClass("glyphicon-pause");
-            that.$playButtonImage.addClass("glyphicon-play");
+            this.$playButtonImage.addClass("glyphicon-play");
         }
     };
 
@@ -169,58 +170,25 @@ define(["jquery", "Recorder"], function($, Recorder){
             this.recording = true;
             // TODO: stop the player
 
-            // TODO: clean this up / move it to the Recorder class
-            if (!navigator.getUserMedia)
-                navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-            if (!navigator.cancelAnimationFrame)
-                navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
-            if (!navigator.requestAnimationFrame)
-                navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
-
-            navigator.getUserMedia(
-                {
-                    "audio": {
-                        "mandatory": {
-                            "googEchoCancellation": "false",
-                            "googAutoGainControl": "false",
-                            "googNoiseSuppression": "false",
-                            "googHighpassFilter": "false"
-                        },
-                        "optional": []
-                    },
-                }, function(stream){
-
-                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-                    var audioContext = new AudioContext();
-                    var inputPoint = audioContext.createGain();
-
-                    // Create an AudioNode from the stream.
-                    realAudioInput = audioContext.createMediaStreamSource(stream);
-                    audioInput = realAudioInput;
-                    audioInput.connect(inputPoint);
-
-                    // audioInput = convertToMono( input );
-
-                    analyserNode = audioContext.createAnalyser();
-                    analyserNode.fftSize = 2048;
-                    inputPoint.connect( analyserNode );
-
-                    that.recorder = new Recorder( inputPoint );
-                    that.recorder.record();
-
-                }, function(e) {
-                    alert('Error getting audio');
-                    console.log(e);
-                });
-
-
-
-
-
+            Recorder.start(this.onrecorderstart);
 
         }
 
 
+    };
+
+    Player.prototype.onrecorderstart = function(recorder){
+
+        this.recorder = recorder;
+        this.recorder.record();
+
+    };
+
+    /**
+     * Starts a tangent timeline on the currentTime
+     */
+    Player.prototype.startTangent = function(){
+        document.createElement("div");
     };
 
     return Player;
