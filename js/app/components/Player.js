@@ -25,7 +25,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.mouseDown = $.proxy(this.mouseDown, this);
         this.mouseUp = $.proxy(this.mouseUp, this);
         this.moveplayhead = $.proxy(this.moveplayhead, this);
-        this.play = $.proxy(this.play, this);
+        this.toggle = $.proxy(this.toggle, this);
         this.record = $.proxy(this.record, this);
         this.onrecorderstart = $.proxy(this.onrecorderstart, this);
         this.init();
@@ -57,7 +57,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         // forcing load so we can get the duration earlier
         this.config.music.load();
 
-        this.config.playButton.addEventListener('click', this.play, false);
+        this.config.playButton.addEventListener('click', this.toggle, false);
 
         this.config.recordButton.addEventListener('click', this.record, false);
 
@@ -126,24 +126,38 @@ define(["jquery", "Recorder"], function($, Recorder){
             this.config.playhead.style.marginLeft = this.timelineWidth + "px";
         }
     };
+
     /**
      * Play and Pause toggle
      */
-    Player.prototype.play = function(e) {
+    Player.prototype.toggle = function(e) {
         this.$playButtonImage = $(this.config.playButton).find(".glyphicon");
         // start music
         if (this.config.music.paused) {
-            this.config.music.play();
-            // remove play, add pause
-            this.$playButtonImage.removeClass("glyphicon-play");
-            this.$playButtonImage.addClass("glyphicon-pause");
+            this.play();
         } else { // pause music
-            this.config.music.pause();
-            // remove pause, add play
-            this.$playButtonImage.removeClass("glyphicon-pause");
-            this.$playButtonImage.addClass("glyphicon-play");
+            this.stop();
         }
     };
+    /**
+     * Play
+     */
+    Player.prototype.play = function(){
+        this.config.music.play();
+        // remove play, add pause
+        this.$playButtonImage.removeClass("glyphicon-play");
+        this.$playButtonImage.addClass("glyphicon-pause");
+    };
+    /**
+     * Stop!
+     */
+    Player.prototype.stop = function(){
+        this.config.music.pause();
+        // remove pause, add play
+        this.$playButtonImage.removeClass("glyphicon-pause");
+        this.$playButtonImage.addClass("glyphicon-play");
+    };
+
     /**
      * Creates a player object, based on a recording
      * this happens after the recording is done
@@ -168,12 +182,10 @@ define(["jquery", "Recorder"], function($, Recorder){
         } else {
             this.config.recordButton.style.color = "red";
             this.recording = true;
-            // TODO: stop the player
-
+            this.stop();
             Recorder.start(this.onrecorderstart);
 
         }
-
 
     };
 
