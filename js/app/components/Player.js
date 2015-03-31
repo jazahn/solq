@@ -69,8 +69,8 @@ define(["jquery"], function($){
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
-            that.$playButtonImage.removeClass("glyphicon-pause");
-            that.$playButtonImage.addClass("glyphicon-play");
+            this.$playButtonImage.removeClass("glyphicon-pause");
+            this.$playButtonImage.addClass("glyphicon-play");
         }
     };
 
@@ -145,17 +145,28 @@ define(["jquery"], function($){
     };
     /**
      * Creates a player object, based on a recording
+     * this happens after the recording is done
      */
     Player.prototype.sprout = function(){
 
 
     };
     /**
-     * Starts recording FROM this Player
+     * Starts recording from this Player
      */
     Player.prototype.record = function(e){
-        console.log("record");
-        console.log(e);
+        if(this.recording == true){
+            this.config.recordButton.style.color = "black";
+            this.recording = false;
+
+        } else {
+            this.config.recordButton.style.color = "red";
+            this.recording = true;
+            // TODO: stop the player
+            // TODO: start recording
+
+        }
+
 
     };
 
