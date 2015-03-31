@@ -1,26 +1,39 @@
-define(["../lib/jquery"], function($){
+define(["jquery"], function($){
+    /**
+     *
+     * @param config
+     * @constructor
+     */
     var Player = function(config){
         config = config || {};
         var defaultConfig = {
             music: '',
             playButton: '',
+            recordButton: '',
             playhead: '',
             timeline: ''
         };
         this.config = $.extend(defaultConfig, config);
         this.timelineWidth = 0;
-        this.duration = 10;
+        this.duration = 0;
 
         // Boolean value so that mouse is moved on mouseUp only when the playhead is released
         this.onplayhead = false;
+
+        // setting the context of the following event handlers
         this.timeUpdate = $.proxy(this.timeUpdate, this);
         this.mouseDown = $.proxy(this.mouseDown, this);
         this.mouseUp = $.proxy(this.mouseUp, this);
         this.moveplayhead = $.proxy(this.moveplayhead, this);
         this.play = $.proxy(this.play, this);
+        this.record = $.proxy(this.play, this);
         this.init();
 
     };
+
+    /**
+     * initializing the eventListeners
+     */
     Player.prototype.init = function(){
         var that = this;
 
@@ -35,18 +48,24 @@ define(["../lib/jquery"], function($){
         this.config.playhead.addEventListener('mousedown', this.mouseDown, false);
         window.addEventListener('mouseup', this.mouseUp, false);
 
-        // Gets audio file duration
+        // Gets audio file duration as soon as that audio stops buffering
         this.config.music.addEventListener("canplaythrough", function () {
             that.duration = that.config.music.duration;
         }, false);
 
         // forcing load so we can get the duration earlier
         this.config.music.load();
+
         this.config.playButton.addEventListener('click', this.play, false);
 
+        this.config.recordButton.addEventListener('click', this.record, false);
+
     };
+
+    /**
+     * moves playhead along the timeline
+     */
     Player.prototype.timeUpdate = function(){
-        console.log("timeUpdate");
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
@@ -54,20 +73,31 @@ define(["../lib/jquery"], function($){
             that.$playButtonImage.addClass("glyphicon-play");
         }
     };
-    // returns click as decimal (.77) of the total timelineWidth
-    // click listener
+
+    /**
+     * returns click as decimal (.77) of the total timelineWidth
+     * click listener
+     * @param {event} e
+     * @returns {number}
+     */
     Player.prototype.clickPercent = function(e) {
         return (e.pageX - this.config.timeline.offsetLeft) / this.timelineWidth;
     };
-    // mouseDown EventListener
+
+    /**
+     * mouseDown EventListener
+     */
     Player.prototype.mouseDown = function() {
         var that = this;
         this.onplayhead = true;
         window.addEventListener('mousemove', this.moveplayhead, true);
         this.config.music.removeEventListener('timeupdate', this.timeUpdate, false);
     };
-    // mouseUp EventListener
-    // getting input from all mouse clicks
+
+    /**
+     * mouseUp EventListener
+     * @param {event} e
+     */
     Player.prototype.mouseUp = function(e) {
         var that = this;
         if (this.onplayhead == true) {
@@ -78,8 +108,11 @@ define(["../lib/jquery"], function($){
         }
         this.onplayhead = false;
     };
-    // mousemove EventListener
-    // Moves playhead as user drags
+    /**
+     * mousemove EventListener
+     * moves playhead as user drags
+     * @param {event} e
+     */
     Player.prototype.moveplayhead = function(e) {
         var newMargLeft = e.pageX - this.config.timeline.offsetLeft;
         if (newMargLeft >= 0 && newMargLeft <= this.timelineWidth) {
@@ -92,9 +125,10 @@ define(["../lib/jquery"], function($){
             this.config.playhead.style.marginLeft = this.timelineWidth + "px";
         }
     };
-    //Play and Pause
+    /**
+     * Play and Pause toggle
+     */
     Player.prototype.play = function() {
-        console.log("play");
         this.$playButtonImage = $(this.config.playButton).find(".glyphicon");
         // start music
         if (this.config.music.paused) {
@@ -108,6 +142,19 @@ define(["../lib/jquery"], function($){
             this.$playButtonImage.removeClass("glyphicon-pause");
             this.$playButtonImage.addClass("glyphicon-play");
         }
+    };
+    /**
+     * Creates a player object, based on a recording
+     */
+    Player.prototype.sprout = function(){
+
+
+    };
+    /**
+     * Starts recording FROM this Player
+     */
+    Player.prototype.record = function(){
+
     };
 
     return Player;
