@@ -1,4 +1,4 @@
-define(["jquery"], function($){
+define(["jquery", "Recorder"], function($, Recorder){
     /**
      *
      * @param config
@@ -26,7 +26,7 @@ define(["jquery"], function($){
         this.mouseUp = $.proxy(this.mouseUp, this);
         this.moveplayhead = $.proxy(this.moveplayhead, this);
         this.play = $.proxy(this.play, this);
-        this.record = $.proxy(this.play, this);
+        this.record = $.proxy(this.record, this);
         this.init();
 
     };
@@ -69,7 +69,7 @@ define(["jquery"], function($){
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
         this.config.playhead.style.marginLeft = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
-            that.$playButtonImage.removeClass("glyphicon-pause");
+            this.$playButtonImage.removeClass("glyphicon-pause");
             that.$playButtonImage.addClass("glyphicon-play");
         }
     };
@@ -128,7 +128,7 @@ define(["jquery"], function($){
     /**
      * Play and Pause toggle
      */
-    Player.prototype.play = function() {
+    Player.prototype.play = function(e) {
         this.$playButtonImage = $(this.config.playButton).find(".glyphicon");
         // start music
         if (this.config.music.paused) {
@@ -145,15 +145,81 @@ define(["jquery"], function($){
     };
     /**
      * Creates a player object, based on a recording
+     * this happens after the recording is done
      */
     Player.prototype.sprout = function(){
 
 
     };
     /**
-     * Starts recording FROM this Player
+     * Starts recording from this Player
+     * click handler, toggles recording
+     * @param {event} e
      */
-    Player.prototype.record = function(){
+    Player.prototype.record = function(e){
+        var that = this;
+        if(this.recording == true){
+            this.config.recordButton.style.color = "black";
+            this.recording = false;
+            this.recorder.stop();
+            this.recorder.exportWAV(this.recorder.doneEncoding);
+
+        } else {
+            this.config.recordButton.style.color = "red";
+            this.recording = true;
+            // TODO: stop the player
+
+            // TODO: clean this up / move it to the Recorder class
+            if (!navigator.getUserMedia)
+                navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            if (!navigator.cancelAnimationFrame)
+                navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+            if (!navigator.requestAnimationFrame)
+                navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
+
+            navigator.getUserMedia(
+                {
+                    "audio": {
+                        "mandatory": {
+                            "googEchoCancellation": "false",
+                            "googAutoGainControl": "false",
+                            "googNoiseSuppression": "false",
+                            "googHighpassFilter": "false"
+                        },
+                        "optional": []
+                    },
+                }, function(stream){
+
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    var audioContext = new AudioContext();
+                    var inputPoint = audioContext.createGain();
+
+                    // Create an AudioNode from the stream.
+                    realAudioInput = audioContext.createMediaStreamSource(stream);
+                    audioInput = realAudioInput;
+                    audioInput.connect(inputPoint);
+
+                    // audioInput = convertToMono( input );
+
+                    analyserNode = audioContext.createAnalyser();
+                    analyserNode.fftSize = 2048;
+                    inputPoint.connect( analyserNode );
+
+                    that.recorder = new Recorder( inputPoint );
+                    that.recorder.record();
+
+                }, function(e) {
+                    alert('Error getting audio');
+                    console.log(e);
+                });
+
+
+
+
+
+
+        }
+
 
     };
 
