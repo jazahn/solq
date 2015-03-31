@@ -5,16 +5,14 @@
     border: 1px dotted black;
 }
 
-#pButton{
+.playerBtn {
     height:60px;
     width: 60px;
-    background-size: 50% 50%;
-    background-repeat: no-repeat;
-    background-position: center;
     float:left;
     outline:none;
     background: transparent;
     border: none !important;
+    font-size: 2em;
 }
 
 #timeline{
