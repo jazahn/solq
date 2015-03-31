@@ -26,7 +26,7 @@ define(["jquery"], function($){
         this.mouseUp = $.proxy(this.mouseUp, this);
         this.moveplayhead = $.proxy(this.moveplayhead, this);
         this.play = $.proxy(this.play, this);
-        this.record = $.proxy(this.play, this);
+        this.record = $.proxy(this.record, this);
         this.init();
 
     };
@@ -128,7 +128,7 @@ define(["jquery"], function($){
     /**
      * Play and Pause toggle
      */
-    Player.prototype.play = function() {
+    Player.prototype.play = function(e) {
         this.$playButtonImage = $(this.config.playButton).find(".glyphicon");
         // start music
         if (this.config.music.paused) {
@@ -153,7 +153,9 @@ define(["jquery"], function($){
     /**
      * Starts recording FROM this Player
      */
-    Player.prototype.record = function(){
+    Player.prototype.record = function(e){
+        console.log("record");
+        console.log(e);
 
     };
 
