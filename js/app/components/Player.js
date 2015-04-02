@@ -16,6 +16,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.config = $.extend(defaultConfig, config);
         this.timelineWidth = 0;
         this.duration = 0;
+        this.recording = false;
 
         // Boolean value so that mouse is moved on mouseUp only when the playhead is released
         this.onplayhead = false;
@@ -28,14 +29,14 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.toggle = $.proxy(this.toggle, this);
         this.record = $.proxy(this.record, this);
         this.onrecorderstart = $.proxy(this.onrecorderstart, this);
-        this.init();
+        this.listen();
 
     };
 
     /**
      * initializing the eventListeners
      */
-    Player.prototype.init = function(){
+    Player.prototype.listen = function(){
         var that = this;
 
         this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
@@ -152,20 +153,16 @@ define(["jquery", "Recorder"], function($, Recorder){
      * Stop!
      */
     Player.prototype.stop = function(){
+        if(!this.$playButtonImage){
+            this.$playButtonImage = $(this.config.playButton).find(".glyphicon");
+        }
+
         this.config.music.pause();
         // remove pause, add play
         this.$playButtonImage.removeClass("glyphicon-pause");
         this.$playButtonImage.addClass("glyphicon-play");
     };
-
-    /**
-     * Creates a player object, based on a recording
-     * this happens after the recording is done
-     */
-    Player.prototype.sprout = function(){
-
-
-    };
+    
     /**
      * Starts recording from this Player
      * click handler, toggles recording
@@ -175,12 +172,15 @@ define(["jquery", "Recorder"], function($, Recorder){
         var that = this;
         if(this.recording == true){
             this.config.recordButton.style.color = "black";
+            console.log(this.config);
+            $(this.config.recordButton).removeClass("recording");
             this.recording = false;
             this.recorder.stop();
             this.recorder.exportWAV(this.recorder.doneEncoding);
 
         } else {
             this.config.recordButton.style.color = "red";
+            $(this.config.recordButton).addClass("recording");
             this.recording = true;
             this.stop();
             Recorder.start(this.onrecorderstart);
