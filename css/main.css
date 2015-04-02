@@ -3,6 +3,7 @@
     height: 260px;
     margin: 50px auto auto auto;
     border: 1px dotted black;
+    position: relative;
 }
 
 .playerBtn {
@@ -86,17 +87,17 @@
         transform: scale(none);
         -webkit-transform: scale(none);
     }
-}
+} /* end keyframes for recordingAnim */
 
 .homeTimeline {
     width: 400px;
     height: 3px;
 }
 .timeline{
-    margin-top: 20px;
-    float: left;
+    top: 60px;
     border-radius: 15px;
     background: rgba(255,0,0,.8);
+    position: absolute;
 
 }
 .playhead{
@@ -104,5 +105,6 @@
     height: 8px;
     border-radius: 50%;
     background: rgba(0, 0, 0,1);
+    position: absolute;
 
 }

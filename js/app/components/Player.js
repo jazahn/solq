@@ -1,6 +1,7 @@
 define(["jquery", "Recorder"], function($, Recorder){
     /**
      *
+     *
      * @param config
      * @constructor
      */
@@ -17,6 +18,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.timelineWidth = 0;
         this.duration = 0;
         this.recording = false;
+        this.recordings = [];
 
         // Boolean value so that mouse is moved on mouseUp only when the playhead is released
         this.onplayhead = false;
@@ -69,7 +71,7 @@ define(["jquery", "Recorder"], function($, Recorder){
      */
     Player.prototype.timeUpdate = function(){
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
-        this.config.playhead.style.marginLeft = playPercent + "px";
+        this.config.playhead.style.left = playPercent + "px";
         if (this.config.music.currentTime == this.duration) {
             this.$playButtonImage.removeClass("glyphicon-pause");
             this.$playButtonImage.addClass("glyphicon-play");
@@ -83,7 +85,7 @@ define(["jquery", "Recorder"], function($, Recorder){
      * @returns {number}
      */
     Player.prototype.clickPercent = function(e) {
-        return (e.pageX - this.config.timeline.offsetLeft) / this.timelineWidth;
+        return (e.pageX - this.config.timeline.parentNode.offsetLeft) / this.timelineWidth;
     };
 
     /**
@@ -116,15 +118,15 @@ define(["jquery", "Recorder"], function($, Recorder){
      * @param {event} e
      */
     Player.prototype.moveplayhead = function(e) {
-        var newMargLeft = e.pageX - this.config.timeline.offsetLeft;
-        if (newMargLeft >= 0 && newMargLeft <= this.timelineWidth) {
-            this.config.playhead.style.marginLeft = newMargLeft + "px";
+        var newLeft = e.pageX - this.config.timeline.parentNode.offsetLeft;
+        if (newLeft >= 0 && newLeft <= this.timelineWidth) {
+            this.config.playhead.style.left = newLeft + "px";
         }
-        if (newMargLeft < 0) {
-            this.config.playhead.style.marginLeft = "0px";
+        if (newLeft < 0) {
+            this.config.playhead.style.left = "0px";
         }
-        if (newMargLeft > this.timelineWidth) {
-            this.config.playhead.style.marginLeft = this.timelineWidth + "px";
+        if (newLeft > this.timelineWidth) {
+            this.config.playhead.style.left = this.timelineWidth + "px";
         }
     };
 
@@ -148,6 +150,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         // remove play, add pause
         this.$playButtonImage.removeClass("glyphicon-play");
         this.$playButtonImage.addClass("glyphicon-pause");
+
     };
     /**
      * Stop!
@@ -161,8 +164,9 @@ define(["jquery", "Recorder"], function($, Recorder){
         // remove pause, add play
         this.$playButtonImage.removeClass("glyphicon-pause");
         this.$playButtonImage.addClass("glyphicon-play");
+
     };
-    
+
     /**
      * Starts recording from this Player
      * click handler, toggles recording
@@ -172,11 +176,13 @@ define(["jquery", "Recorder"], function($, Recorder){
         var that = this;
         if(this.recording == true){
             this.config.recordButton.style.color = "black";
-            console.log(this.config);
             $(this.config.recordButton).removeClass("recording");
             this.recording = false;
             this.recorder.stop();
-            this.recorder.exportWAV(this.recorder.doneEncoding);
+            this.recordings.push(this.recorder);
+            // this.recorder.exportWAV(this.recorder.doneEncoding);
+
+            window.clearInterval(this.timelineInterval);
 
         } else {
             this.config.recordButton.style.color = "red";
@@ -189,10 +195,15 @@ define(["jquery", "Recorder"], function($, Recorder){
 
     };
 
+    /**
+     * callback to send to the Recorder instance so it can do its stuff and come back to this context with the recorder instance
+     * @param {Recorder} recorder
+     */
     Player.prototype.onrecorderstart = function(recorder){
 
         this.recorder = recorder;
         this.recorder.record();
+        this.startTangent();
 
     };
 
@@ -200,7 +211,18 @@ define(["jquery", "Recorder"], function($, Recorder){
      * Starts a tangent timeline on the currentTime
      */
     Player.prototype.startTangent = function(){
-        document.createElement("div");
+        var newTimeline = document.createElement("div");
+        newTimeline.className = "timeline";
+        var currentHeight = 0;
+        newTimeline.style.width = 3 + "px";
+        newTimeline.style.height = currentHeight + "px";
+        newTimeline.style.left = this.config.playhead.style.left;
+
+        this.config.timeline.parentNode.appendChild(newTimeline);
+        this.timelineInterval = window.setInterval(function(){
+            currentHeight++;
+            newTimeline.style.height = currentHeight + "px";
+        }, 500);
     };
 
     return Player;
