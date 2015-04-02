@@ -18,7 +18,10 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.timelineWidth = 0;
         this.duration = 0;
         this.recording = false;
-        this.recordings = [];
+
+        if(this.config.playButton == ''){
+            this.createPlayButton();
+        }
 
         // Boolean value so that mouse is moved on mouseUp only when the playhead is released
         this.onplayhead = false;
@@ -31,8 +34,32 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.toggle = $.proxy(this.toggle, this);
         this.record = $.proxy(this.record, this);
         this.onrecorderstart = $.proxy(this.onrecorderstart, this);
+
         this.listen();
 
+    };
+
+    /**
+     *
+     */
+    Player.prototype.createPlayButton = function(){
+        var left = parseInt(this.config.timeline.style.left || 0);
+        console.log(this.config.timeline.style.top);
+        console.log(this.config.timeline.style.height);
+        var top = parseInt(this.config.timeline.style.top || 0) + parseInt(this.config.timeline.style.height || 0);
+
+        this.config.playButton = document.createElement("div");
+        console.log(top);
+        this.config.playButton.style.left = left + "px";
+        this.config.playButton.style.top = top + "px";
+        this.config.playButton.className = "branchPlayerBtn";
+
+        //<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+        var glyph = document.createElement("span");
+        glyph.className = "glyphicon glyphicon-play";
+        glyph.setAttribute("aria-hidden", "true");
+        this.config.playButton.appendChild(glyph);
+        this.config.timeline.parentNode.appendChild(this.config.playButton);
     };
 
     /**
@@ -49,8 +76,10 @@ define(["jquery", "Recorder"], function($, Recorder){
         }, false);
 
         // Makes playhead draggable
-        this.config.playhead.addEventListener('mousedown', this.mouseDown, false);
-        window.addEventListener('mouseup', this.mouseUp, false);
+        if(this.config.playhead) {
+            this.config.playhead.addEventListener('mousedown', this.mouseDown, false);
+            window.addEventListener('mouseup', this.mouseUp, false);
+        }
 
         // Gets audio file duration as soon as that audio stops buffering
         this.config.music.addEventListener("canplaythrough", function () {
@@ -62,7 +91,9 @@ define(["jquery", "Recorder"], function($, Recorder){
 
         this.config.playButton.addEventListener('click', this.toggle, false);
 
-        this.config.recordButton.addEventListener('click', this.record, false);
+        if(this.config.recordButton){
+            this.config.recordButton.addEventListener('click', this.record, false);
+        }
 
     };
 
@@ -179,10 +210,31 @@ define(["jquery", "Recorder"], function($, Recorder){
             $(this.config.recordButton).removeClass("recording");
             this.recording = false;
             this.recorder.stop();
-            this.recordings.push(this.recorder);
             // this.recorder.exportWAV(this.recorder.doneEncoding);
 
             window.clearInterval(this.timelineInterval);
+
+            // create an audio element
+            /*
+             var blob = new Blob(decodedData, {type: "correct-mimetype/here"});
+             var url = URL.createObjectURL(blob);
+             audio.src = url;
+             */
+            this.recorder.exportWAV(function(blob){
+                var newAudio = document.createElement("audio");
+                newAudio.src = URL.createObjectURL(blob);
+
+                // create new player
+                var newPlayer = new Player({
+                    music: newAudio,
+                    timeline: that.newTimeline
+                });
+            });
+
+
+
+
+
 
         } else {
             this.config.recordButton.style.color = "red";
@@ -209,20 +261,25 @@ define(["jquery", "Recorder"], function($, Recorder){
 
     /**
      * Starts a tangent timeline on the currentTime
+     * @return newly minted timeline element
      */
     Player.prototype.startTangent = function(){
-        var newTimeline = document.createElement("div");
-        newTimeline.className = "timeline";
-        var currentHeight = 0;
-        newTimeline.style.width = 3 + "px";
-        newTimeline.style.height = currentHeight + "px";
-        newTimeline.style.left = this.config.playhead.style.left;
+        var that = this;
 
-        this.config.timeline.parentNode.appendChild(newTimeline);
+        this.newTimeline = document.createElement("div");
+        this.newTimeline.className = "timeline";
+        var currentHeight = 0;
+        this.newTimeline.style.width = 3 + "px";
+        this.newTimeline.style.height = currentHeight + "px";
+        this.newTimeline.style.left = this.config.playhead.style.left;
+        this.newTimeline.style.top = this.config.timeline.style.top;
+
+        this.config.timeline.parentNode.appendChild(this.newTimeline);
         this.timelineInterval = window.setInterval(function(){
             currentHeight++;
-            newTimeline.style.height = currentHeight + "px";
-        }, 500);
+            that.newTimeline.style.height = currentHeight + "px";
+        }, 100);
+
     };
 
     return Player;
