@@ -43,16 +43,18 @@ define(["jquery", "Recorder"], function($, Recorder){
      *
      */
     Player.prototype.createPlayButton = function(){
+
         var left = parseInt(this.config.timeline.style.left || 0);
-        console.log(this.config.timeline.style.top);
-        console.log(this.config.timeline.style.height);
-        var top = parseInt(this.config.timeline.style.top || 0) + parseInt(this.config.timeline.style.height || 0);
+
+        // have to get it this way because the top is computed via the class
+        var timelineTop = window.getComputedStyle(this.config.timeline).getPropertyValue("top");
+        var top = parseInt(timelineTop || 0) + parseInt(this.config.timeline.style.height || 0);
 
         this.config.playButton = document.createElement("div");
-        console.log(top);
         this.config.playButton.style.left = left + "px";
         this.config.playButton.style.top = top + "px";
         this.config.playButton.className = "branchPlayerBtn";
+        this.config.playButton.position = "absolute";
 
         //<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
         var glyph = document.createElement("span");
@@ -210,11 +212,10 @@ define(["jquery", "Recorder"], function($, Recorder){
             $(this.config.recordButton).removeClass("recording");
             this.recording = false;
             this.recorder.stop();
-            // this.recorder.exportWAV(this.recorder.doneEncoding);
 
+            // clears the interval that grows the tangent from startTangent
             window.clearInterval(this.timelineInterval);
 
-            // create an audio element
             /*
              var blob = new Blob(decodedData, {type: "correct-mimetype/here"});
              var url = URL.createObjectURL(blob);
@@ -226,6 +227,7 @@ define(["jquery", "Recorder"], function($, Recorder){
 
                 // create new player
                 var newPlayer = new Player({
+                    playhead: that.config.playhead,
                     music: newAudio,
                     timeline: that.newTimeline
                 });
@@ -261,7 +263,6 @@ define(["jquery", "Recorder"], function($, Recorder){
 
     /**
      * Starts a tangent timeline on the currentTime
-     * @return newly minted timeline element
      */
     Player.prototype.startTangent = function(){
         var that = this;
@@ -272,6 +273,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.newTimeline.style.width = 3 + "px";
         this.newTimeline.style.height = currentHeight + "px";
         this.newTimeline.style.left = this.config.playhead.style.left;
+        this.newTimeline.style.position = "absolute";
         this.newTimeline.style.top = this.config.timeline.style.top;
 
         this.config.timeline.parentNode.appendChild(this.newTimeline);
