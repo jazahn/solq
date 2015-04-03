@@ -74,7 +74,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         var timelineTop = window.getComputedStyle(this.config.timeline).getPropertyValue("top");
         var top = parseInt(timelineTop || 0) + parseInt(this.config.timeline.style.height || 0);
 
-        this.config.playButton = document.createElement("div");
+        this.config.playButton = document.createElement("button");
         this.config.playButton.style.left = left + "px";
         this.config.playButton.style.top = top + "px";
         this.config.playButton.className = "branchPlayerBtn";
