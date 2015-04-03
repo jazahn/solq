@@ -15,11 +15,15 @@ define(["jquery", "Recorder"], function($, Recorder){
             timeline: ''
         };
         this.config = $.extend(defaultConfig, config);
+
+        // timelineWidth is matter of perspective
+        // using the same variable for vertical and horizontal timelines
         this.timelineWidth = 0;
         this.duration = 0;
         this.recording = false;
 
         if(this.config.playButton == ''){
+            this.isBranch = true;
             this.createPlayButton();
         }
 
@@ -70,7 +74,12 @@ define(["jquery", "Recorder"], function($, Recorder){
     Player.prototype.listen = function(){
         var that = this;
 
-        this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
+        if(this.isBranch){
+            this.timelineWidth = this.config.timeline.offsetHeight - this.config.playhead.offsetHeight;
+        } else {
+            this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
+        }
+
         this.config.music.addEventListener("timeupdate", this.timeUpdate, false);
         this.config.timeline.addEventListener("click", function (event) {
             that.moveplayhead(event);
@@ -104,7 +113,15 @@ define(["jquery", "Recorder"], function($, Recorder){
      */
     Player.prototype.timeUpdate = function(){
         var playPercent = this.timelineWidth * (this.config.music.currentTime / this.duration);
-        this.config.playhead.style.left = playPercent + "px";
+
+        if(this.isBranch){
+            this.config.playhead.style.top = playPercent + "px";
+            this.config.playhead.style.left = this.config.timeline.style.left;
+        } else {
+            this.config.playhead.style.left = playPercent + "px";
+            this.config.playhead.style.top = this.config.timeline.style.top;
+        }
+
         if (this.config.music.currentTime == this.duration) {
             this.$playButtonImage.removeClass("glyphicon-pause");
             this.$playButtonImage.addClass("glyphicon-play");
@@ -151,15 +168,22 @@ define(["jquery", "Recorder"], function($, Recorder){
      * @param {event} e
      */
     Player.prototype.moveplayhead = function(e) {
-        var newLeft = e.pageX - this.config.timeline.parentNode.offsetLeft;
+        var newLeft, leftop;
+        if(this.isBranch){
+            newLeft = e.pageX - this.config.timeline.parentNode.offsetTop;
+            leftop = "top";
+        } else {
+            newLeft = e.pageX - this.config.timeline.parentNode.offsetLeft;
+            leftop = "left";
+        }
         if (newLeft >= 0 && newLeft <= this.timelineWidth) {
-            this.config.playhead.style.left = newLeft + "px";
+            this.config.playhead.style[leftop] = newLeft + "px";
         }
         if (newLeft < 0) {
-            this.config.playhead.style.left = "0px";
+            this.config.playhead.style[leftop] = "0px";
         }
         if (newLeft > this.timelineWidth) {
-            this.config.playhead.style.left = this.timelineWidth + "px";
+            this.config.playhead.style[leftop] = this.timelineWidth + "px";
         }
     };
 
