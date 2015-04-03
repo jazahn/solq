@@ -1,8 +1,20 @@
 define(["jquery", "Recorder"], function($, Recorder){
     /**
+     * Player object
      *
+     * Currently 2 types of Players, a "trunk" and a "branch"
+     *  A branch will have no record button.. but could if we wanted sub-branches..
+     *  A branch is expected to not be passed a playButton, as it will generate it's own
+     *  A branch is expected to take the playhead of its trunk
      *
-     * @param config
+     * @param {object} config
+     * @param {audio} config.music - audio DOM element, required
+     * @param {object} config.timeline - div DOM element representing the timeline, required
+     * @param {object} config.playhead - div DOM element representing the playhead, required, but can be passed the same
+     *  playhead as the parent "trunk" Player
+     * @param {object} config.playButton - button DOM element, not required -- but will generate if not found
+     * @param {object} config.recordButton - button DOM element, not required -- but expected for a trunk
+     *
      * @constructor
      */
     var Player = function(config){
@@ -16,19 +28,28 @@ define(["jquery", "Recorder"], function($, Recorder){
         };
         this.config = $.extend(defaultConfig, config);
 
-        // timelineWidth is matter of perspective
-        // using the same variable for vertical and horizontal timelines
-        this.timelineWidth = 0;
         this.duration = 0;
-        this.recording = false;
+        this.isRecording = false;
+        this.isBranch = false;
+
+        // Boolean value so that mouse is moved on mouseUp only when the playhead is released
+        this.onplayhead = false;
+
+        /*
+         * timelineWidth is matter of perspective
+         * using the same variable for vertical and horizontal timelines
+         */
+        this.timelineWidth = 0;
+        if(this.isBranch){
+            this.timelineWidth = this.config.timeline.offsetHeight - this.config.playhead.offsetHeight;
+        } else {
+            this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
+        }
 
         if(this.config.playButton == ''){
             this.isBranch = true;
             this.createPlayButton();
         }
-
-        // Boolean value so that mouse is moved on mouseUp only when the playhead is released
-        this.onplayhead = false;
 
         // setting the context of the following event handlers
         this.timeUpdate = $.proxy(this.timeUpdate, this);
@@ -44,7 +65,7 @@ define(["jquery", "Recorder"], function($, Recorder){
     };
 
     /**
-     *
+     * Creates a play button for a timeline without one
      */
     Player.prototype.createPlayButton = function(){
 
@@ -60,7 +81,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.config.playButton.className = "branchPlayerBtn";
         this.config.playButton.position = "absolute";
 
-        //<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+        // <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
         var glyph = document.createElement("span");
         glyph.className = "glyphicon glyphicon-play";
         glyph.setAttribute("aria-hidden", "true");
@@ -74,16 +95,10 @@ define(["jquery", "Recorder"], function($, Recorder){
     Player.prototype.listen = function(){
         var that = this;
 
-        if(this.isBranch){
-            this.timelineWidth = this.config.timeline.offsetHeight - this.config.playhead.offsetHeight;
-        } else {
-            this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
-        }
-
         this.config.music.addEventListener("timeupdate", this.timeUpdate, false);
         this.config.timeline.addEventListener("click", function (event) {
             that.moveplayhead(event);
-            that.config.music.currentTime = that.duration * that.clickPercent(event);
+            that.config.music.currentTime = that.duration * that.clickPercent(event.pageX);
         }, false);
 
         // Makes playhead draggable
@@ -131,15 +146,16 @@ define(["jquery", "Recorder"], function($, Recorder){
     /**
      * returns click as decimal (.77) of the total timelineWidth
      * click listener
-     * @param {event} e
+     * @param {number} pageX - comes from an event.pageX
      * @returns {number}
      */
-    Player.prototype.clickPercent = function(e) {
-        return (e.pageX - this.config.timeline.parentNode.offsetLeft) / this.timelineWidth;
+    Player.prototype.clickPercent = function(pageX) {
+        return (pageX - this.config.timeline.parentNode.offsetLeft) / this.timelineWidth;
     };
 
     /**
      * mouseDown EventListener
+     *
      */
     Player.prototype.mouseDown = function() {
         var that = this;
@@ -150,6 +166,7 @@ define(["jquery", "Recorder"], function($, Recorder){
 
     /**
      * mouseUp EventListener
+     * for when moving the playhead, on release
      * @param {event} e
      */
     Player.prototype.mouseUp = function(e) {
@@ -157,7 +174,7 @@ define(["jquery", "Recorder"], function($, Recorder){
         if (this.onplayhead == true) {
             window.removeEventListener('mousemove', this.moveplayhead, true);
             // change current time
-            this.config.music.currentTime = this.duration * this.clickPercent(e);
+            this.config.music.currentTime = this.duration * this.clickPercent(e.pageX);
             this.config.music.addEventListener('timeupdate', this.timeUpdate, false);
         }
         this.onplayhead = false;
@@ -231,10 +248,10 @@ define(["jquery", "Recorder"], function($, Recorder){
      */
     Player.prototype.record = function(e){
         var that = this;
-        if(this.recording == true){
+        if(this.isRecording == true){
             this.config.recordButton.style.color = "black";
             $(this.config.recordButton).removeClass("recording");
-            this.recording = false;
+            this.isRecording = false;
             this.recorder.stop();
 
             // clears the interval that grows the tangent from startTangent
@@ -257,15 +274,10 @@ define(["jquery", "Recorder"], function($, Recorder){
                 });
             });
 
-
-
-
-
-
         } else {
             this.config.recordButton.style.color = "red";
             $(this.config.recordButton).addClass("recording");
-            this.recording = true;
+            this.isRecording = true;
             this.stop();
             Recorder.start(this.onrecorderstart);
 

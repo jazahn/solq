@@ -3,11 +3,6 @@
  * MIT License
  */
 define([], function(){
-    /**
-     *
-     * @param config
-     * @constructor
-     */
     var WORKER_PATH = 'js/lib/recorderWorker.js';
 
     var Recorder = function(source, cfg){
