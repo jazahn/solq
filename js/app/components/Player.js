@@ -68,16 +68,16 @@ define(["jquery", "Recorder"], function($, Recorder){
      */
     Player.prototype.createPlayButton = function(){
 
-        var left = parseInt(this.config.timeline.style.left || 0);
+        var left = parseInt(this.config.timeline.style.left || 0) - 15;
 
         // have to get it this way because the top is computed via the class
         var timelineTop = window.getComputedStyle(this.config.timeline).getPropertyValue("top");
         var top = parseInt(timelineTop || 0) + parseInt(this.config.timeline.style.height || 0);
 
         this.config.playButton = document.createElement("button");
+        this.config.playButton.className = "branchPlayerBtn";
         this.config.playButton.style.left = left + "px";
         this.config.playButton.style.top = top + "px";
-        this.config.playButton.className = "branchPlayerBtn";
         this.config.playButton.position = "absolute";
 
         // <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
