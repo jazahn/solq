@@ -1,3 +1,5 @@
+Demo here: [https://jazahn.github.io/solq/](https://jazahn.github.io/solq/)
+
 # solq
 This is a prototype for a language lab tool making use of HTML5 audio. Project name of *Soliloquy*.
 
@@ -21,7 +23,7 @@ You're going to want to run this in dev via an https server, otherwise you'll ha
 
 ### Creating SSL certs
 Using http-server with SSL means using the '-S' flag. This is going to need ssl certs. To create them:
-`openssl req -newkey rsa:2048 -new -nodes -keyout key.pem -out key.pem`
-`openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem`
+ * `openssl req -newkey rsa:2048 -new -nodes -keyout key.pem -out key.pem`
+ * `openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem`
 
 Now you can use `http-server -S`
