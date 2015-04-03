@@ -31,6 +31,10 @@ define(["jquery", "Recorder"], function($, Recorder){
         this.duration = 0;
         this.isRecording = false;
         this.isBranch = false;
+        if(this.config.playButton == ''){
+            this.isBranch = true;
+            this.createPlayButton();
+        }
 
         // Boolean value so that mouse is moved on mouseUp only when the playhead is released
         this.onplayhead = false;
@@ -44,11 +48,6 @@ define(["jquery", "Recorder"], function($, Recorder){
             this.timelineWidth = this.config.timeline.offsetHeight - this.config.playhead.offsetHeight;
         } else {
             this.timelineWidth = this.config.timeline.offsetWidth - this.config.playhead.offsetWidth;
-        }
-
-        if(this.config.playButton == ''){
-            this.isBranch = true;
-            this.createPlayButton();
         }
 
         // setting the context of the following event handlers
