@@ -10,3 +10,8 @@ This is a prototype for a language lab tool making use of HTML5 audio. Project n
  
 ## Inspired by Steven Clancy's "timevine" idea:
  ![timevine](https://raw.github.com/jazahn/solq/gh-pages/media/timevine.jpg)
+
+## Dependencies
+ * jQuery
+ * [RequireJS](http://requirejs.org/)
+ * [Bootstrap](http://getbootstrap.com/) (just for glyphicons)
